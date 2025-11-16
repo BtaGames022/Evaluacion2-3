@@ -1,78 +1,155 @@
 package com.levelupgamer.app.ui.screens
 
+import android.app.Application
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingCart // <-- IMPORTADO
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.levelupgamer.app.navigation.BottomNavItems
+import androidx.navigation.navArgument
+import com.levelupgamer.app.navigation.AppScreens
+import com.levelupgamer.app.viewmodel.ProductDetailViewModel
+import com.levelupgamer.app.viewmodel.ProductDetailViewModelFactory
 
 /**
- * Pantalla principal que contiene el Scaffold, la barra de navegación inferior
- * y el NavHost anidado para Home y Perfil.
- *
- * Acepta una función 'onLogout' para pasarla a la pantalla de Perfil.
+ * Representa un ítem de la barra de navegación inferior.
  */
+data class BottomNavItem(
+    val route: String,
+    val icon: ImageVector,
+    val label: String
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    onLogout: () -> Unit // <-- ACEPTA LA FUNCIÓN DE LOGOUT
+    onLogout: () -> Unit
 ) {
-    // Controlador de navegación para el contenido INTERNO (Home, Perfil)
-    val contentNavController = rememberNavController()
+    val mainNavController = rememberNavController()
 
-    // Lista de items de la barra
-    val navItems = listOf(
-        BottomNavItems.Home,
-        BottomNavItems.Profile
+    // --- Definición de los ítems de la barra inferior (CON CARRITO) ---
+    val bottomNavItems = listOf(
+        BottomNavItem(AppScreens.HomeTab.route, Icons.Default.Home, "Inicio"),
+        BottomNavItem(AppScreens.CartTab.route, Icons.Default.ShoppingCart, "Carrito"), // <-- NUEVO
+        BottomNavItem(AppScreens.ProfileTab.route, Icons.Default.Person, "Perfil")
     )
 
     Scaffold(
         bottomBar = {
-            NavigationBar { // Barra de navegación inferior
-                val navBackStackEntry by contentNavController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-
-                navItems.forEach { screen ->
-                    NavigationBarItem(
-                        icon = { Icon(screen.icon, contentDescription = screen.label) },
-                        label = { Text(screen.label) },
-                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                        onClick = {
-                            contentNavController.navigate(screen.route) {
-                                popUpTo(contentNavController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                }
-            }
+            BottomNavigationBar(navController = mainNavController, items = bottomNavItems)
         }
-    ) { innerPadding ->
-        // --- NavHost Anidado ---
-        // Este NavHost cambia el contenido *dentro* del Scaffold
-        NavHost(
-            navController = contentNavController,
-            startDestination = BottomNavItems.Home.route,
-            modifier = Modifier.padding(innerPadding) // Aplica el padding del Scaffold
-        ) {
-            composable(BottomNavItems.Home.route) {
-                HomeScreen() // Llama a la pantalla del catálogo
+    ) { paddingValues ->
+        // --- NavHost anidado (Ahora incluye DETALLE) ---
+        MainNavHost(
+            mainNavController = mainNavController,
+            onLogout = onLogout,
+            modifier = Modifier.padding(paddingValues)
+        )
+    }
+}
+
+/**
+ * Este es el NavHost que controla el contenido PRINCIPAL (Pestañas y Detalle).
+ */
+@Composable
+fun MainNavHost(
+    mainNavController: NavHostController,
+    onLogout: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    NavHost(
+        navController = mainNavController,
+        startDestination = AppScreens.HomeTab.route, // Ruta inicial
+        modifier = modifier
+    ) {
+        // --- Tab de Inicio ---
+        composable(AppScreens.HomeTab.route) {
+            HomeScreen(
+                // Al hacer clic en un producto, navegar a Detalles
+                onProductClick = { productId ->
+                    mainNavController.navigate(AppScreens.ProductDetail.createRoute(productId))
+                }
+            )
+        }
+
+        // --- Tab de Carrito (NUEVO) ---
+        composable(AppScreens.CartTab.route) {
+            CartScreen()
+        }
+
+        // --- Tab de Perfil ---
+        composable(AppScreens.ProfileTab.route) {
+            ProfileScreen(onLogout = onLogout)
+        }
+
+        // --- Pantalla de Detalle de Producto (NUEVO) ---
+        composable(
+            route = AppScreens.ProductDetail.route,
+            arguments = listOf(navArgument("productId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            // Obtener el productId de la ruta
+            val productId = backStackEntry.arguments?.getString("productId")
+            if (productId == null) {
+                // Manejar error (ej. volver atrás)
+                mainNavController.popBackStack()
+                return@composable
             }
-            composable(BottomNavItems.Profile.route) {
-                // --- CAMBIO AQUÍ ---
-                // Pasa la función de logout a la ProfileScreen
-                ProfileScreen(onLogout = onLogout)
-            }
+
+            // Usar la Factory para crear el ViewModel con el productId
+            val application = LocalContext.current.applicationContext as Application
+            val viewModel: ProductDetailViewModel = viewModel(
+                factory = ProductDetailViewModelFactory(application, productId)
+            )
+
+            ProductDetailScreen(
+                viewModel = viewModel,
+                onBack = { mainNavController.popBackStack() } // Botón para volver
+            )
+        }
+    }
+}
+
+// ... (El Composable BottomNavigationBar no cambia)
+@Composable
+fun BottomNavigationBar(
+    navController: NavController,
+    items: List<BottomNavItem>
+) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    NavigationBar {
+        items.forEach { item ->
+            NavigationBarItem(
+                icon = { Icon(item.icon, contentDescription = item.label) },
+                label = { Text(item.label) },
+                selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
+                onClick = {
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
     }
 }

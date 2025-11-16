@@ -1,26 +1,34 @@
 package com.levelupgamer.app.data
 
 import com.levelupgamer.app.model.Product
+import com.levelupgamer.app.model.ProductStock
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Repositorio que maneja las operaciones de datos para los Productos.
+ * Repositorio actualizado para manejar Productos y su Stock.
  */
-class ProductRepository(private val productDao: ProductDao) {
+class ProductRepository(
+    private val productDao: ProductDao,
+    private val stockDao: ProductStockDao // <-- DAO DE STOCK AÑADIDO
+) {
 
-    /**
-     * Obtiene un Flow con todos los productos.
-     * La UI observará este Flow para actualizarse automáticamente
-     * si los datos cambian.
-     */
     fun getAllProducts(): Flow<List<Product>> {
         return productDao.getAll()
     }
 
+    // --- NUEVAS FUNCIONES ---
+
     /**
-     * Obtiene un Flow de productos filtrados por categoría.
+     * Obtiene un solo producto por su ID.
      */
-    fun getProductsByCategory(category: String): Flow<List<Product>> {
-        return productDao.getByCategory(category)
+    fun getProductById(productId: String): Flow<Product?> {
+        return productDao.getProductById(productId)
+    }
+
+    /**
+     * Obtiene la disponibilidad (stock) de un producto.
+     */
+    fun getStockForProduct(productId: String): Flow<List<ProductStock>> {
+        return stockDao.getStockForProduct(productId)
     }
 }

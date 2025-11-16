@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.levelupgamer.app.LevelUpGamerApplication
+import com.levelupgamer.app.data.CartRepository
 import com.levelupgamer.app.data.ProductRepository
 import com.levelupgamer.app.model.HomeUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,36 +17,46 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Obtenemos el repositorio
     private val productRepository: ProductRepository =
         (application as LevelUpGamerApplication).productRepository
 
-    // --- Estado Interno y Público ---
+    // Inyectar el CartRepository
+    private val cartRepository: CartRepository =
+        (application as LevelUpGamerApplication).cartRepository
+
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    // init se ejecuta cuando el ViewModel es creado
     init {
         loadProducts()
     }
 
+    // --- ¡¡ESTA ES LA FUNCIÓN QUE FALTABA!! ---
     /**
-     * Carga la lista de productos desde el repositorio (Room).
+     * Añade un producto al carrito del usuario actual.
      */
+    fun addToCart(productId: String) {
+        viewModelScope.launch {
+            try {
+                cartRepository.addProductToCart(productId)
+                // TODO: Mostrar un feedback (ej. un Snackbar) de "Producto añadido"
+            } catch (e: Exception) {
+                // TODO: Manejar error
+            }
+        }
+    }
+    // --- FIN DE LA FUNCIÓN ---
+
     private fun loadProducts() {
         viewModelScope.launch {
             productRepository.getAllProducts()
                 .onStart {
-                    // Muestra la carga al inicio
                     _uiState.update { it.copy(isLoading = true) }
                 }
                 .catch { exception ->
-                    // Maneja un posible error
                     _uiState.update { it.copy(isLoading = false) }
-                    // TODO: Mostrar error en la UI
                 }
                 .collect { productList ->
-                    // Éxito: actualiza la lista y oculta la carga
                     _uiState.update {
                         it.copy(
                             isLoading = false,

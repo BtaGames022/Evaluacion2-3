@@ -85,6 +85,12 @@ dependencies {
     // --- 5. LIBRERÍA DE IMÁGENES (CÁMARA/GALERÍA) ---
     implementation("io.coil-kt:coil-compose:2.6.0")
 
+    // Esta línea es la que trae los íconos base (como Home, Person)
+    implementation(libs.androidx.compose.material3)
+
+    // --- ¡¡ESTA LÍNEA ARREGLARÁ LOS ERRORES DE ÍCONOS!! ---
+    implementation(libs.androidx.compose.material.icons.extended)
+
     // --- TESTING ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
