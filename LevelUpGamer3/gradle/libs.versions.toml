@@ -2,7 +2,7 @@
 # --- Plugins ---
 agp = "8.4.0"
 kotlin = "1.9.22"
-ksp = "1.9.23-1.0.19"
+ksp = "1.9.22-1.0.17"
 
 # --- Dependencias ---
 coreKtx = "1.13.1"

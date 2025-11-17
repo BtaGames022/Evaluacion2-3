@@ -1,7 +1,11 @@
 # --- REGLAS PARA LEVEL UP GAMER ---
 
 # 1. Mantener los Modelos de Datos (Para que Gson pueda leer el JSON)
--keep class com.levelupgamer.app.model.** { *; }
+# Esta regla es crucial. Mantiene las clases en el paquete 'model' y, más importante,
+# mantiene los nombres de sus campos, lo cual es necesario para que la deserialización
+# de JSON funcione correctamente.
+-keepclassmembers class com.levelupgamer.app.model.** { *; }
+-keep public class com.levelupgamer.app.model.**
 
 # 2. Mantener Retrofit y las llamadas a API
 -keep interface com.levelupgamer.app.data.remote.** { *; }

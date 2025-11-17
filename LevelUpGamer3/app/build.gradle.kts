@@ -47,6 +47,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
 
             // Descomenta la siguiente línea cuando configures tu firma.
             // signingConfig = signingConfigs.getByName("release")
@@ -65,7 +66,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     packaging {
         resources {
@@ -91,8 +92,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
 
     // --- CONEXIÓN API REST (RETROFIT) ---
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
 
     // --- OTRAS DEPENDENCIAS ---
     implementation(libs.kotlinx.coroutines.android)
