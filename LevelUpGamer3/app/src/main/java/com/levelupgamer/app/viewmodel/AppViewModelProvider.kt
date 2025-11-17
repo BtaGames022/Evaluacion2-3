@@ -53,7 +53,9 @@ object AppViewModelProvider {
         // Initializer para SpringViewModel (Microservicio)
         initializer {
             SpringViewModel(
-                SpringRepositoryImpl()
+                SpringRepositoryImpl(),
+                levelupGamerApplication().productRepository,
+                levelupGamerApplication().cartRepository
             )
         }
     }

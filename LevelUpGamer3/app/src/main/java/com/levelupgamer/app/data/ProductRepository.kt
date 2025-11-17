@@ -4,31 +4,36 @@ import com.levelupgamer.app.model.Product
 import com.levelupgamer.app.model.ProductStock
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Repositorio actualizado para manejar Productos y su Stock.
- */
-class ProductRepository(
-    private val productDao: ProductDao,
-    private val stockDao: ProductStockDao // <-- DAO DE STOCK AÑADIDO
-) {
+// 1. La Interfaz
+interface ProductRepository {
+    fun getAllProducts(): Flow<List<Product>>
+    fun getProductById(productId: String): Flow<Product?>
+    fun getStockForProduct(productId: String): Flow<List<ProductStock>>
+    // --- NUEVA FUNCIÓN ---
+    suspend fun saveProduct(product: Product)
+}
 
-    fun getAllProducts(): Flow<List<Product>> {
+// 2. La Implementación
+class ProductRepositoryImpl(
+    private val productDao: ProductDao,
+    private val stockDao: ProductStockDao
+) : ProductRepository {
+
+    override fun getAllProducts(): Flow<List<Product>> {
         return productDao.getAll()
     }
 
-    // --- NUEVAS FUNCIONES ---
-
-    /**
-     * Obtiene un solo producto por su ID.
-     */
-    fun getProductById(productId: String): Flow<Product?> {
+    override fun getProductById(productId: String): Flow<Product?> {
         return productDao.getProductById(productId)
     }
 
-    /**
-     * Obtiene la disponibilidad (stock) de un producto.
-     */
-    fun getStockForProduct(productId: String): Flow<List<ProductStock>> {
+    override fun getStockForProduct(productId: String): Flow<List<ProductStock>> {
         return stockDao.getStockForProduct(productId)
+    }
+
+    // --- IMPLEMENTACIÓN NUEVA ---
+    override suspend fun saveProduct(product: Product) {
+        // Usamos insertAll porque tu DAO tiene ese método, y pasamos una lista de 1 elemento
+        productDao.insertAll(listOf(product))
     }
 }

@@ -5,6 +5,7 @@ import com.levelupgamer.app.data.CartRepository
 import com.levelupgamer.app.data.FileProviderUtil
 import com.levelupgamer.app.data.LevelUpDatabase
 import com.levelupgamer.app.data.ProductRepository
+import com.levelupgamer.app.data.ProductRepositoryImpl
 import com.levelupgamer.app.data.SessionDataStore
 import com.levelupgamer.app.data.UserRepository
 
@@ -21,8 +22,8 @@ class LevelUpGamerApplication : Application() {
     }
 
     val productRepository: ProductRepository by lazy {
-        // Ahora pasamos ambos DAOs
-        ProductRepository(database.productDao(), database.stockDao())
+        // Ahora usamos la implementación concreta
+        ProductRepositoryImpl(database.productDao(), database.stockDao())
     }
 
     val sessionDataStore: SessionDataStore by lazy {
