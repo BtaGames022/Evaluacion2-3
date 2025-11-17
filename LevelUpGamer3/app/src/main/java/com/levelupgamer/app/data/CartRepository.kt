@@ -2,6 +2,7 @@ package com.levelupgamer.app.data
 
 import com.levelupgamer.app.model.CartItem
 import com.levelupgamer.app.model.CartProduct
+import com.levelupgamer.app.model.User // <-- Asegúrate de que este import esté
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
@@ -22,6 +23,18 @@ class CartRepository(
         return userDao.getByEmail(email)?.id
     }
 
+    // --- AÑADIR ESTA NUEVA FUNCIÓN ---
+    /**
+     * Obtiene el objeto User completo del usuario logueado.
+     * Lo usaremos para verificar el descuento de Duoc.
+     */
+    suspend fun getCurrentUser(): User? {
+        val email = sessionDataStore.userEmailFlow.first() ?: return null
+        return userDao.getByEmail(email)
+    }
+    // --- FIN DE LA ADICIÓN ---
+
+
     /**
      * Obtiene el contenido del carrito (Productos + Cantidad) para el usuario logueado.
      */
@@ -29,6 +42,8 @@ class CartRepository(
         val userId = getCurrentUserId() ?: return null
         return cartDao.getCartContents(userId)
     }
+
+    // ... (El resto del archivo no cambia: addProductToCart, increase, decrease, etc.) ...
 
     /**
      * Añade un producto al carrito. Si ya existe, suma 1 a la cantidad.

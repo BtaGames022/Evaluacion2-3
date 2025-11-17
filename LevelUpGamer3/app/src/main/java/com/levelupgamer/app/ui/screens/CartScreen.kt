@@ -35,8 +35,7 @@ fun CartScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // --- ¡¡PETICIÓN 2 IMPLEMENTADA (UI)!! ---
-    // Muestra el diálogo si el estado en el ViewModel es verdadero.
+    // ... (El diálogo de Alerta no cambia) ...
     if (uiState.showCheckoutSuccessDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissCheckoutDialog() },
@@ -51,6 +50,7 @@ fun CartScreen(
     }
 
     Scaffold(
+        // ... (TopBar no cambia) ...
         topBar = {
             TopAppBar(title = { Text("Mi Carrito") })
         }
@@ -61,6 +61,9 @@ fun CartScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
+
+            // ... (La lógica de isLoading, errorMessage y carrito vacío no cambia) ...
+
             if (uiState.isLoading) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -91,7 +94,46 @@ fun CartScreen(
                 Divider()
                 Spacer(Modifier.height(16.dp))
 
-                // --- Resumen del total ---
+                // --- Resumen del total (ACTUALIZADO CON DESGLOSE) ---
+
+                // 1. Subtotal
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Subtotal:", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        formatCurrency(uiState.subtotal),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+
+                // 2. Descuento (Solo si aplica)
+                if (uiState.isDuocUser && uiState.discount > 0) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Descuento Duoc (20%):",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            "- ${formatCurrency(uiState.discount)}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                // 3. Total Final
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -99,14 +141,16 @@ fun CartScreen(
                 ) {
                     Text("Total:", style = MaterialTheme.typography.headlineSmall)
                     Text(
-                        formatCurrency(uiState.totalAmount),
+                        formatCurrency(uiState.totalAmount), // Este es el total CON descuento
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                 }
+                // --- FIN DEL RESUMEN ACTUALIZADO ---
+
                 Spacer(Modifier.height(16.dp))
 
-                // --- Botones de acción ---
+                // --- Botones de acción (no cambian) ---
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
@@ -117,8 +161,6 @@ fun CartScreen(
                     ) {
                         Text("Vaciar Carrito")
                     }
-                    // --- BOTÓN PAGAR (ACTUALIZADO) ---
-                    // Llama a la nueva función del ViewModel
                     Button(onClick = { viewModel.onCheckoutClicked() }) {
                         Text("Pagar")
                     }
@@ -128,9 +170,7 @@ fun CartScreen(
     }
 }
 
-/**
- * Tarjeta para un item individual en el carrito.
- */
+// ... (El Composable CartItemCard no cambia) ...
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartItemCard(

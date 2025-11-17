@@ -3,9 +3,11 @@ package com.levelupgamer.app.ui.screens
 import android.app.Application
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+// --- ¡IMPORTANTE! Añade este import ---
+import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ShoppingCart // <-- IMPORTADO
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,9 +29,7 @@ import com.levelupgamer.app.navigation.AppScreens
 import com.levelupgamer.app.viewmodel.ProductDetailViewModel
 import com.levelupgamer.app.viewmodel.ProductDetailViewModelFactory
 
-/**
- * Representa un ítem de la barra de navegación inferior.
- */
+// ... (data class BottomNavItem no cambia) ...
 data class BottomNavItem(
     val route: String,
     val icon: ImageVector,
@@ -43,10 +43,12 @@ fun MainScreen(
 ) {
     val mainNavController = rememberNavController()
 
-    // --- Definición de los ítems de la barra inferior (CON CARRITO) ---
+    // --- Definición de los ítems de la barra inferior (ACTUALIZADO) ---
     val bottomNavItems = listOf(
         BottomNavItem(AppScreens.HomeTab.route, Icons.Default.Home, "Inicio"),
-        BottomNavItem(AppScreens.CartTab.route, Icons.Default.ShoppingCart, "Carrito"), // <-- NUEVO
+        BottomNavItem(AppScreens.CartTab.route, Icons.Default.ShoppingCart, "Carrito"),
+        // --- AÑADIR ESTA LÍNEA ---
+        BottomNavItem(AppScreens.PostScreen.route, Icons.Default.Article, "Blog"),
         BottomNavItem(AppScreens.ProfileTab.route, Icons.Default.Person, "Perfil")
     )
 
@@ -97,6 +99,13 @@ fun MainNavHost(
         composable(AppScreens.ProfileTab.route) {
             ProfileScreen(onLogout = onLogout)
         }
+
+        // --- AÑADIR ESTE COMPOSABLE ---
+        // --- Tab de Blog (API) ---
+        composable(AppScreens.PostScreen.route) {
+            PostScreen() // El ViewModel se inyectará automáticamente
+        }
+        // --- FIN DE LA ADICIÓN ---
 
         // --- Pantalla de Detalle de Producto (NUEVO) ---
         composable(

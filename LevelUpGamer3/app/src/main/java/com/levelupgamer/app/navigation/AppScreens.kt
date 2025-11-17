@@ -13,8 +13,9 @@ sealed class AppScreens(val route: String) {
 
     // 3. Pestañas de la Barra de Navegación Inferior
     object HomeTab : AppScreens("home_tab")
-    object CartTab : AppScreens("cart_tab") // <-- NUEVO CARRITO
+    object CartTab : AppScreens("cart_tab")
     object ProfileTab : AppScreens("profile_tab")
+    data object PostScreen : AppScreens("post_screen") // <-- AÑADIR ESTA LÍNEA
 
     // 4. Pantalla de Detalle (con argumento)
     // Define la ruta base y el nombre del argumento

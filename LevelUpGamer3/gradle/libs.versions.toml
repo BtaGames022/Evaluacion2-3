@@ -14,6 +14,15 @@ room = "2.6.1"
 datastore = "1.1.0"
 coroutines = "1.7.3"
 
+# --- NUEVO (Guía 14) ---
+retrofit = "2.11.0"
+
+# --- NUEVO (Guía 15) ---
+kotest = "5.8.0" # (Versión actualizada de la guía)
+junit5 = "5.10.0" # (Versión actualizada de la guía)
+mockk = "1.13.10"
+coroutinesTest = "1.7.3" # (Coincide con 'coroutines')
+
 # --- Testing ---
 junit = "4.13.2"
 androidxTestExtJunit = "1.1.5"
@@ -51,7 +60,18 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 # --- 4. PERSISTENCIA LOCAL: DATASTORE (Guía 12) ---
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
-# --- TESTING ---
+# --- 5. API REST (NUEVO - Guía 14) ---
+retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+
+# --- 6. TESTING (NUEVO - Guía 15) ---
+kotest-runner-junit5 = { group = "io.kotest", name = "kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit5" }
+mockk-core = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+
+# --- TESTING (Existente) ---
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

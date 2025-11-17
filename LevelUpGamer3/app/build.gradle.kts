@@ -52,6 +52,12 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // --- AÑADIR ESTO (Guía 15) ---
+    // Configura el runner de tests para usar JUnit 5 (necesario para Kotest)
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
 }
 
 dependencies {
@@ -62,9 +68,7 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
-
-    // --- ¡¡ESTA LÍNEA ES LA CLAVE!! ---
-    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3) // Ya incluye íconos base
 
     // --- 1. VIEWMODEL, LIFECYCLE, CORRUTINAS ---
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -85,14 +89,24 @@ dependencies {
     // --- 5. LIBRERÍA DE IMÁGENES (CÁMARA/GALERÍA) ---
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // Esta línea es la que trae los íconos base (como Home, Person)
-    implementation(libs.androidx.compose.material3)
+    // --- 6. API REST (NUEVO - Guía 14) ---
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
 
-    // --- ¡¡ESTA LÍNEA ARREGLARÁ LOS ERRORES DE ÍCONOS!! ---
+    // --- 7. ÍCONOS EXTENDIDOS (Ya estaba) ---
     implementation(libs.androidx.compose.material.icons.extended)
 
     // --- TESTING ---
-    testImplementation(libs.junit)
+    testImplementation(libs.junit) // JUnit 4 base
+
+    // --- TESTING (NUEVO - Guía 15) ---
+    testImplementation(libs.kotest.runner.junit5) // Runner de Kotest
+    testImplementation(libs.kotest.assertions.core) // Assertions (shouldBe)
+    testImplementation(libs.junit.jupiter) // JUnit 5
+    testImplementation(libs.mockk.core) // MockK
+    testImplementation(libs.kotlinx.coroutines.test) // Para testear corrutinas
+
+    // --- ANDROID TESTING (Existente) ---
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -19,11 +19,15 @@ import kotlinx.coroutines.launch
  */
 data class CartUiState(
     val cartProducts: List<CartProduct> = emptyList(),
-    val totalAmount: Double = 0.0,
+    // --- CAMPOS DE TOTAL ACTUALIZADOS ---
+    val subtotal: Double = 0.0,         // Total antes de descuentos
+    val discount: Double = 0.0,         // El monto descontado
+    val totalAmount: Double = 0.0,      // El total final a pagar
+    val isDuocUser: Boolean = false,    // Para que la UI sepa si mostrar el descuento
+    // --- FIN CAMPOS ACTUALIZADOS ---
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    // --- ¡¡PETICIÓN 2 IMPLEMENTADA (LÓGICA)!! ---
-    val showCheckoutSuccessDialog: Boolean = false // <-- NUEVO ESTADO PARA EL DIÁLOGO
+    val showCheckoutSuccessDialog: Boolean = false
 )
 
 class CartViewModel(application: Application) : AndroidViewModel(application) {
@@ -42,6 +46,15 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
+                // --- LÓGICA DE DESCUENTO (INICIO) ---
+                // 1. Obtener el usuario actual y su estado de Duoc
+                val user = cartRepository.getCurrentUser()
+                val isDuoc = user?.isDuocUser == true
+                // Actualizamos el estado de la UI con esta información
+                _uiState.update { it.copy(isDuocUser = isDuoc) }
+                // --- LÓGICA DE DESCUENTO (FIN) ---
+
+
                 val cartFlow = cartRepository.getCartContents()
                 if (cartFlow == null) {
                     _uiState.update { it.copy(isLoading = false, errorMessage = "Usuario no encontrado") }
@@ -53,10 +66,25 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
                         _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
                     }
                     .collect { products ->
-                        val total = products.sumOf { it.product.precio * it.quantity }
+                        // --- LÓGICA DE DESCUENTO (APLICACIÓN) ---
+
+                        // 1. Calcular el subtotal (total sin descuento)
+                        val subtotal = products.sumOf { it.product.precio * it.quantity }
+
+                        // 2. Obtener el estado de Duoc (que ya cargamos)
+                        val isDuocUser = _uiState.value.isDuocUser
+
+                        // 3. Calcular descuento y total
+                        val discount = if (isDuocUser) subtotal * 0.20 else 0.0
+                        val total = subtotal - discount
+                        // --- FIN LÓGICA DE DESCUENTO ---
+
                         _uiState.update {
                             it.copy(
                                 cartProducts = products,
+                                // Guardamos los 3 valores
+                                subtotal = subtotal,
+                                discount = discount,
                                 totalAmount = total,
                                 isLoading = false
                             )
@@ -68,7 +96,7 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // ... (increase, decrease, removeItem sin cambios) ...
+    // ... (increase, decrease, removeItem, clearCart sin cambios) ...
     fun increaseQuantity(productId: String) {
         viewModelScope.launch {
             cartRepository.increaseItemQuantity(productId)
@@ -90,20 +118,13 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // --- ¡¡PETICIÓN 2 IMPLEMENTADA (LÓGICA)!! ---
-
-    /**
-     * Se llama al presionar "Pagar".
-     * Vacía el carrito y muestra el diálogo de éxito.
-     */
+    // ... (onCheckoutClicked, dismissCheckoutDialog sin cambios) ...
     fun onCheckoutClicked() {
         viewModelScope.launch {
             try {
-                if (_uiState.value.cartProducts.isEmpty()) return@launch // No pagar si el carrito está vacío
+                if (_uiState.value.cartProducts.isEmpty()) return@launch
 
                 cartRepository.clearUserCart()
-                // El 'collect' en loadCart() refrescará la lista a vacío.
-                // Ahora mostramos el diálogo:
                 _uiState.update { it.copy(showCheckoutSuccessDialog = true) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(errorMessage = "Error al procesar el pago: ${e.message}") }
@@ -111,9 +132,6 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /**
-     * Oculta el diálogo de éxito de la compra.
-     */
     fun dismissCheckoutDialog() {
         _uiState.update { it.copy(showCheckoutSuccessDialog = false) }
     }
