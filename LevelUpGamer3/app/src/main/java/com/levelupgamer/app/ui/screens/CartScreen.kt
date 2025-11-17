@@ -91,7 +91,7 @@ fun CartScreen(
                 }
 
                 Spacer(Modifier.height(16.dp))
-                Divider()
+                HorizontalDivider()
                 Spacer(Modifier.height(16.dp))
 
                 // --- Resumen del total (ACTUALIZADO CON DESGLOSE) ---
