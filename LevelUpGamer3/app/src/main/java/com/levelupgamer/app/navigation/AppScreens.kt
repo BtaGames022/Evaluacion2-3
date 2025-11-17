@@ -12,15 +12,19 @@ sealed class AppScreens(val route: String) {
     data object MainScreen : AppScreens("main_screen")
 
     // 3. Pestañas de la Barra de Navegación Inferior
-    object HomeTab : AppScreens("home_tab")
-    object CartTab : AppScreens("cart_tab")
-    object ProfileTab : AppScreens("profile_tab")
-    data object PostScreen : AppScreens("post_screen") // <-- AÑADIR ESTA LÍNEA
+    data object HomeTab : AppScreens("home_tab")
+    data object CartTab : AppScreens("cart_tab")
+    data object ProfileTab : AppScreens("profile_tab")
+
+    // Pestaña para el Blog (API Externa)
+    data object PostScreen : AppScreens("post_screen")
+
+    // --- ESTA ES LA LÍNEA CLAVE PARA TU ERROR ---
+    data object MicroserviceScreen : AppScreens("microservice_screen")
+    // -------------------------------------------
 
     // 4. Pantalla de Detalle (con argumento)
-    // Define la ruta base y el nombre del argumento
-    object ProductDetail : AppScreens("product_detail/{productId}") {
-        // Función helper para construir la ruta con el ID real
+    data object ProductDetail : AppScreens("product_detail/{productId}") {
         fun createRoute(productId: String) = "product_detail/$productId"
     }
 }

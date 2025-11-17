@@ -68,49 +68,52 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3) // Ya incluye íconos base
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
 
-    // --- 1. VIEWMODEL, LIFECYCLE, CORRUTINAS ---
+    // --- ARREGLO DEL ERROR "initializer" (IMPORTANTE) ---
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.0")
+
+    // --- CONEXIÓN API REST (RETROFIT) ---
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // --- OTRAS DEPENDENCIAS YA EXISTENTES ---
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.android)
-
-    // --- 2. NAVEGACIÓN ---
     implementation(libs.androidx.navigation.compose)
-
-    // --- 3. PERSISTENCIA LOCAL: ROOM (SQLite) ---
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler) // Usa KSP para el compilador
-
-    // --- 4. PERSISTENCIA LOCAL: DATASTORE ---
+    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
-
-    // --- 5. LIBRERÍA DE IMÁGENES (CÁMARA/GALERÍA) ---
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // --- 6. API REST (NUEVO - Guía 14) ---
-    implementation(libs.retrofit.core)
-    implementation(libs.retrofit.converter.gson)
-
-    // --- 7. ÍCONOS EXTENDIDOS (Ya estaba) ---
-    implementation(libs.androidx.compose.material.icons.extended)
-
     // --- TESTING ---
-    testImplementation(libs.junit) // JUnit 4 base
+    testImplementation(libs.junit)
+    testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.kotest.assertions.core)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockk.core)
+    testImplementation(libs.kotlinx.coroutines.test)
 
-    // --- TESTING (NUEVO - Guía 15) ---
-    testImplementation(libs.kotest.runner.junit5) // Runner de Kotest
-    testImplementation(libs.kotest.assertions.core) // Assertions (shouldBe)
-    testImplementation(libs.junit.jupiter) // JUnit 5
-    testImplementation(libs.mockk.core) // MockK
-    testImplementation(libs.kotlinx.coroutines.test) // Para testear corrutinas
-
-    // --- ANDROID TESTING (Existente) ---
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    // -------------------------------------------
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.0")
+    // -------------------------------------------
+
+    // Asegúrate de tener también estas (ya deberían estar):
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // ESTA ES LA CLAVE. Sin "-ktx", "initializer" no existe.
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+
+    // Asegúrate de tener también esta para Compose
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 }

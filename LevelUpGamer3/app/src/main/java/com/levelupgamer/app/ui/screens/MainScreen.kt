@@ -3,11 +3,11 @@ package com.levelupgamer.app.ui.screens
 import android.app.Application
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-// --- ¡IMPORTANTE! Añade este import ---
 import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Star // <--- IMPORTANTE: Para el ícono de Ofertas
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,11 +25,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+// --- IMPORTS DE TU PROYECTO ---
 import com.levelupgamer.app.navigation.AppScreens
+import com.levelupgamer.app.viewmodel.AppViewModelProvider // <--- IMPORTANTE: Fábrica de ViewModels
 import com.levelupgamer.app.viewmodel.ProductDetailViewModel
 import com.levelupgamer.app.viewmodel.ProductDetailViewModelFactory
 
-// ... (data class BottomNavItem no cambia) ...
+// Clase de datos para los ítems del menú
 data class BottomNavItem(
     val route: String,
     val icon: ImageVector,
@@ -43,12 +45,17 @@ fun MainScreen(
 ) {
     val mainNavController = rememberNavController()
 
-    // --- Definición de los ítems de la barra inferior (ACTUALIZADO) ---
+    // Definición de los ítems del menú inferior
     val bottomNavItems = listOf(
         BottomNavItem(AppScreens.HomeTab.route, Icons.Default.Home, "Inicio"),
         BottomNavItem(AppScreens.CartTab.route, Icons.Default.ShoppingCart, "Carrito"),
-        // --- AÑADIR ESTA LÍNEA ---
+
+        // Pestaña Blog
         BottomNavItem(AppScreens.PostScreen.route, Icons.Default.Article, "Blog"),
+
+        // Pestaña Ofertas (Microservicio) - Si da error aquí, revisa el import de Icons.Default.Star arriba
+        BottomNavItem(AppScreens.MicroserviceScreen.route, Icons.Default.Star, "Ofertas"),
+
         BottomNavItem(AppScreens.ProfileTab.route, Icons.Default.Person, "Perfil")
     )
 
@@ -57,7 +64,7 @@ fun MainScreen(
             BottomNavigationBar(navController = mainNavController, items = bottomNavItems)
         }
     ) { paddingValues ->
-        // --- NavHost anidado (Ahora incluye DETALLE) ---
+        // Contenedor de navegación principal
         MainNavHost(
             mainNavController = mainNavController,
             onLogout = onLogout,
@@ -66,9 +73,6 @@ fun MainScreen(
     }
 }
 
-/**
- * Este es el NavHost que controla el contenido PRINCIPAL (Pestañas y Detalle).
- */
 @Composable
 fun MainNavHost(
     mainNavController: NavHostController,
@@ -77,50 +81,49 @@ fun MainNavHost(
 ) {
     NavHost(
         navController = mainNavController,
-        startDestination = AppScreens.HomeTab.route, // Ruta inicial
+        startDestination = AppScreens.HomeTab.route,
         modifier = modifier
     ) {
-        // --- Tab de Inicio ---
+        // 1. Inicio
         composable(AppScreens.HomeTab.route) {
             HomeScreen(
-                // Al hacer clic en un producto, navegar a Detalles
                 onProductClick = { productId ->
                     mainNavController.navigate(AppScreens.ProductDetail.createRoute(productId))
                 }
             )
         }
 
-        // --- Tab de Carrito (NUEVO) ---
+        // 2. Carrito
         composable(AppScreens.CartTab.route) {
             CartScreen()
         }
 
-        // --- Tab de Perfil ---
+        // 3. Blog
+        composable(AppScreens.PostScreen.route) {
+            PostScreen()
+        }
+
+        // 4. Ofertas (Microservicio) - Si da error, asegúrate de haber creado el archivo MicroserviceScreen.kt en la misma carpeta
+        composable(AppScreens.MicroserviceScreen.route) {
+            MicroserviceScreen()
+        }
+
+        // 5. Perfil
         composable(AppScreens.ProfileTab.route) {
             ProfileScreen(onLogout = onLogout)
         }
 
-        // --- AÑADIR ESTE COMPOSABLE ---
-        // --- Tab de Blog (API) ---
-        composable(AppScreens.PostScreen.route) {
-            PostScreen() // El ViewModel se inyectará automáticamente
-        }
-        // --- FIN DE LA ADICIÓN ---
-
-        // --- Pantalla de Detalle de Producto (NUEVO) ---
+        // 6. Detalle de Producto
         composable(
             route = AppScreens.ProductDetail.route,
             arguments = listOf(navArgument("productId") { type = NavType.StringType })
         ) { backStackEntry ->
-            // Obtener el productId de la ruta
             val productId = backStackEntry.arguments?.getString("productId")
             if (productId == null) {
-                // Manejar error (ej. volver atrás)
                 mainNavController.popBackStack()
                 return@composable
             }
 
-            // Usar la Factory para crear el ViewModel con el productId
             val application = LocalContext.current.applicationContext as Application
             val viewModel: ProductDetailViewModel = viewModel(
                 factory = ProductDetailViewModelFactory(application, productId)
@@ -128,13 +131,12 @@ fun MainNavHost(
 
             ProductDetailScreen(
                 viewModel = viewModel,
-                onBack = { mainNavController.popBackStack() } // Botón para volver
+                onBack = { mainNavController.popBackStack() }
             )
         }
     }
 }
 
-// ... (El Composable BottomNavigationBar no cambia)
 @Composable
 fun BottomNavigationBar(
     navController: NavController,
