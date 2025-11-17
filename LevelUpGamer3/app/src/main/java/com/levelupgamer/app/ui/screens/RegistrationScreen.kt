@@ -1,14 +1,15 @@
 package com.levelupgamer.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect // <-- Importante para la navegación
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.levelupgamer.app.viewmodel.AppViewModelProvider
 import com.levelupgamer.app.viewmodel.RegistrationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,30 +26,22 @@ import com.levelupgamer.app.viewmodel.RegistrationViewModel
 fun RegistrationScreen(
     onRegisterSuccess: () -> Unit,
     onBackToLogin: () -> Unit,
-    viewModel: RegistrationViewModel = viewModel() // Inyecta el ViewModel
+    viewModel: RegistrationViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    // Observa el estado de la UI (campos, errores, carga)
     val uiState by viewModel.uiState.collectAsState()
-
-    // Observa el evento de éxito de la navegación
     val registrationSuccess by viewModel.registrationSuccess.collectAsState()
 
-    // --- CÓDIGO AÑADIDO PARA NAVEGAR ---
-    // Este bloque "escucha" la variable 'registrationSuccess'.
-    // Si cambia a 'true', ejecuta el código de navegación.
     LaunchedEffect(registrationSuccess) {
         if (registrationSuccess) {
-            onRegisterSuccess() // Llama a la función lambda para navegar
+            onRegisterSuccess()
         }
     }
-    // --- FIN DEL CÓDIGO AÑADIDO ---
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Crear Cuenta") },
                 navigationIcon = {
-                    // Botón para volver a Login
                     IconButton(onClick = onBackToLogin) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
                     }
@@ -60,86 +54,102 @@ fun RegistrationScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState()), // Permite scroll
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            Text(
+                text = "Únete a Level-Up Gamer",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-            Text("Regístrate en Level-Up Gamer", style = MaterialTheme.typography.headlineSmall)
-
-            // --- Campo Nombre ---
+            // Campo Nombre
             OutlinedTextField(
                 value = uiState.nombre,
                 onValueChange = viewModel::onNombreChange,
                 label = { Text("Nombre Completo") },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                 isError = uiState.nombreError != null,
                 supportingText = {
-                    uiState.nombreError?.let { error -> Text(error) }
+                    uiState.nombreError?.let { Text(it) }
                 },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // --- Campo Email ---
+            // Campo Email
             OutlinedTextField(
                 value = uiState.email,
                 onValueChange = viewModel::onEmailChange,
-                label = { Text("Email") },
+                label = { Text("Correo Electrónico") },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 isError = uiState.emailError != null,
                 supportingText = {
-                    uiState.emailError?.let { error -> Text(error) }
+                    uiState.emailError?.let { Text(it) }
                 },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // --- Campo Edad ---
+            // Campo Edad
             OutlinedTextField(
                 value = uiState.edad,
                 onValueChange = viewModel::onEdadChange,
                 label = { Text("Edad") },
+                leadingIcon = { Icon(Icons.Default.Cake, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 isError = uiState.edadError != null,
                 supportingText = {
-                    uiState.edadError?.let { error -> Text(error) }
+                    uiState.edadError?.let { Text(it) }
                 },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // --- Campo Contraseña ---
+            // Campo Contraseña
             OutlinedTextField(
                 value = uiState.password,
                 onValueChange = viewModel::onPasswordChange,
                 label = { Text("Contraseña") },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 isError = uiState.passwordError != null,
                 supportingText = {
-                    uiState.passwordError?.let { error -> Text(error) }
+                    uiState.passwordError?.let { Text(it) }
                 },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // --- Campo Confirmar Contraseña ---
+            // Campo Confirmar Contraseña
             OutlinedTextField(
                 value = uiState.confirmPassword,
                 onValueChange = viewModel::onConfirmPasswordChange,
                 label = { Text("Confirmar Contraseña") },
+                leadingIcon = { Icon(Icons.Default.LockClock, contentDescription = null) },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 isError = uiState.confirmPasswordError != null,
                 supportingText = {
-                    uiState.confirmPasswordError?.let { error -> Text(error) }
+                    uiState.confirmPasswordError?.let { Text(it) }
                 },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(Modifier.height(16.dp))
 
-            // --- Botón de Registro ---
+            // Botón con estado de carga
             Button(
                 onClick = viewModel::registerUser,
                 enabled = !uiState.isLoading,
-                modifier = Modifier.fillMaxWidth().height(48.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
@@ -147,17 +157,34 @@ fun RegistrationScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Registrarse")
+                    Text("Registrarse", style = MaterialTheme.typography.titleMedium)
                 }
             }
 
-            // Muestra un error general (ej. "Email ya existe")
-            uiState.generalError?.let { error ->
-                Text(
-                    text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+            // Animación para error general
+            AnimatedVisibility(visible = uiState.generalError != null) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Error,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = uiState.generalError ?: "",
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
             }
         }
     }

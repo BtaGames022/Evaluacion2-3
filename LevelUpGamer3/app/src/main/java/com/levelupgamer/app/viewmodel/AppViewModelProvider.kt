@@ -13,7 +13,7 @@ object AppViewModelProvider {
         // Initializer para RegistrationViewModel
         initializer {
             RegistrationViewModel(
-                levelupGamerApplication()
+                levelupGamerApplication().userRepository
             )
         }
 

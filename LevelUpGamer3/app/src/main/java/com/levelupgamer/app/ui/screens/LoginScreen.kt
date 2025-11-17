@@ -1,9 +1,12 @@
 package com.levelupgamer.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,106 +18,108 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.levelupgamer.app.viewmodel.AppViewModelProvider
 import com.levelupgamer.app.viewmodel.LoginViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    viewModel: LoginViewModel = viewModel() // Inyecta el ViewModel de Login
+    viewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    // Observa el estado del formulario
     val uiState by viewModel.uiState.collectAsState()
-
-    // Observa el evento de éxito para navegar
     val loginSuccess by viewModel.loginSuccess.collectAsState()
+
     LaunchedEffect(loginSuccess) {
         if (loginSuccess) {
-            onLoginSuccess() // Navega a Home
+            onLoginSuccess()
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Level-Up Gamer") })
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
-
-            Text("Iniciar Sesión", style = MaterialTheme.typography.headlineMedium)
-
-            Spacer(Modifier.height(24.dp))
-
-            // --- Campo Email ---
-            OutlinedTextField(
-                value = uiState.email,
-                onValueChange = viewModel::onEmailChange,
-                label = { Text("Email") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                isError = uiState.emailError != null,
-                supportingText = {
-                    uiState.emailError?.let { error -> Text(error) }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            // --- Campo Contraseña ---
-            OutlinedTextField(
-                value = uiState.password,
-                onValueChange = viewModel::onPasswordChange,
-                label = { Text("Contraseña") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                isError = uiState.passwordError != null,
-                supportingText = {
-                    uiState.passwordError?.let { error -> Text(error) }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            // Muestra error general (ej. "Credenciales incorrectas")
-            uiState.loginError?.let { error ->
-                Text(
-                    text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-
-            // --- Botón de Login ---
-            Button(
-                onClick = viewModel::loginUser,
-                enabled = !uiState.isLoading,
-                modifier = Modifier.fillMaxWidth().height(48.dp)
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                } else {
-                    Text("Ingresar")
+                Text(
+                    text = "Iniciar Sesión",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                // Campo Email
+                OutlinedTextField(
+                    value = uiState.email,
+                    onValueChange = viewModel::onEmailChange,
+                    label = { Text("Email") },
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    isError = uiState.emailError != null,
+                    supportingText = { uiState.emailError?.let { Text(it) } },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Campo Password
+                OutlinedTextField(
+                    value = uiState.password,
+                    onValueChange = viewModel::onPasswordChange,
+                    label = { Text("Contraseña") },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    isError = uiState.passwordError != null,
+                    supportingText = { uiState.passwordError?.let { Text(it) } },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Button(
+                    onClick = viewModel::loginUser,
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text("Ingresar")
+                    }
                 }
-            }
 
-            Spacer(Modifier.height(16.dp))
+                TextButton(onClick = onNavigateToRegister) {
+                    Text("¿No tienes cuenta? Regístrate")
+                }
 
-            // --- Botón para Registrarse ---
-            TextButton(onClick = onNavigateToRegister) {
-                Text("¿No tienes cuenta? Regístrate aquí")
+                // Animación de Error General
+                AnimatedVisibility(visible = uiState.loginError != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Icon(Icons.Default.Error, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = uiState.loginError ?: "",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
             }
         }
     }
